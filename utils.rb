@@ -1,3 +1,5 @@
+require 'pathname'
+
 module Utils
   def self.util_autoload(name, path)
     autoload name, __dir__ + '/utils/' + path
@@ -6,6 +8,7 @@ module Utils
   util_autoload :Log, 'log'
 
   def self.df(path, block_size)
+    path = path.to_s if Pathname === path
     IO.popen(["df", "-B#{block_size}", path], &:read).
       tap { $?.success? or raise "df failed" }.
       split("\n").
