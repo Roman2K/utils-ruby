@@ -1,4 +1,6 @@
-module Utils; class Log
+module Utils
+
+class Log
   LEVELS = %i( debug info warn error ).freeze
   LEVELS_W = LEVELS.map(&:length).max
 
@@ -112,4 +114,6 @@ module Utils; class Log
       end
     end
   end
-end; end
+end
+
+end # Utils

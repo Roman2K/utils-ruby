@@ -6,6 +6,7 @@ module Utils
   end
 
   util_autoload :Log, 'log'
+  util_autoload :QBitTorrent, 'qbittorrent'
 
   def self.df(path, block_size)
     path = path.to_s if Pathname === path

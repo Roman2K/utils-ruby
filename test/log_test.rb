@@ -2,7 +2,9 @@ require 'minitest/autorun'
 require_relative '../utils'
 require 'stringio'
 
-module Utils; class LogTest < Minitest::Test
+module Utils
+
+class LogTest < Minitest::Test
   def test_log
     io = StringIO.new
     log = Log.new io
@@ -78,4 +80,6 @@ EOS
     n = -1
     s.gsub(/\.\.\. .+s$/) { "... TIME%d" % [n += 1] }
   end
-end; end
+end
+
+end # Utils
