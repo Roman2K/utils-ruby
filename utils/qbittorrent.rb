@@ -4,19 +4,6 @@ require 'json'
 module Utils
 
 class QBitTorrent
-  def self.merge_uri(a, b=nil, params={})
-    b, params = URI(""), b if b.kind_of?(Hash) && params == {}
-    a, b = URI(a), URI(b)
-    a.dup.tap do |a|
-      a.path += b.path
-      a.query = [a.query, b.query].compact.
-        map { |qs| Hash[URI.decode_www_form qs] }.
-        push(params.transform_keys &:to_s).
-        inject({}) { |q,h| q.merge h }.
-        yield_self { |h| URI.encode_www_form h unless h.empty? }
-    end
-  end
-
   def initialize(uri, log: Log.new)
     @log = log
     user, password = uri.user, uri.password
@@ -107,7 +94,7 @@ class QBitTorrent
   end
 
   private def add_uri(*args, &block)
-    self.class.merge_uri @uri, *args, &block
+    Utils.merge_uri @uri, *args, &block
   end
 
   private def request(*args, &block)
