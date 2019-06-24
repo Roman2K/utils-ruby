@@ -33,4 +33,21 @@ module Utils
         yield_self { |h| URI.encode_www_form h unless h.empty? }
     end
   end
+
+  def self.retry(attempts, *excs)
+    attempts > 0 or return
+    cur = 1
+    begin
+      return yield cur
+    rescue => exc
+      case exc
+      when *excs
+      else raise
+      end
+      attempts -= 1
+      attempts > 0 or raise
+      cur += 1
+      retry
+    end
+  end
 end
