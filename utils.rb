@@ -34,7 +34,7 @@ module Utils
     end
   end
 
-  def self.retry(attempts, *excs)
+  def self.retry(attempts, *excs, wait: nil)
     attempts > 0 or return
     cur = 1
     begin
@@ -47,6 +47,11 @@ module Utils
       attempts -= 1
       attempts > 0 or raise
       cur += 1
+      if w = wait
+        w = w[] if Proc === w
+        $stderr.puts "waiting %.1fs before retrying..." % [w]
+        sleep w
+      end
       retry
     end
   end
