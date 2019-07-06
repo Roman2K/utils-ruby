@@ -36,7 +36,7 @@ module Fmt
       @s.size - (i+1)
     end
 
-    def to_s(prec=-1)
+    def to_s(prec=-1, z: true)
       cur = self.prec
       case
       when prec < 0 || prec == cur
@@ -47,6 +47,8 @@ module Fmt
         DecFmt.new(BigDecimal(@s).round(prec)).to_s prec
       else
         @s.ljust(@s.size + (prec - cur), "0")
+      end.tap do |s|
+        s.sub! /\.?0+$/, "" if !z
       end
     end
   end
