@@ -11,6 +11,8 @@ class Log
     self.level = level
   end
 
+  attr_reader :io
+
   def level=(name)
     @level_idx = find_level name
   end
@@ -43,7 +45,11 @@ class Log
     puts *args, level: level, &block if find_level(level) >= @level_idx
   end
 
-  private def puts(*msgs, level: nil)
+  def print(*args, **opts, &block)
+    puts *args, **opts, eol: false, &block
+  end
+
+  def puts(*msgs, level: :info, eol: true)
     id = @lock.next!
 
     msgs.map! do |msg|
@@ -56,7 +62,8 @@ class Log
     @io.print "\n" if @lock.printing?
 
     if !block_given?
-      @io.print msg, "\n"
+      @io.print msg
+      @io.print "\n" if eol
       return
     end
 
@@ -72,7 +79,8 @@ class Log
         else
           msg << time
         end
-        @io.print msg, "\n"
+        @io.print msg
+        @io.print "\n" if eol
       end
     end
   end
