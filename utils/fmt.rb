@@ -52,6 +52,29 @@ module Fmt
       end
     end
   end
+
+  class NumFmt
+    def initialize(multiple, units)
+      @multiple = multiple
+      @units = units
+    end
+
+    def format(n, prec=0)
+      n = BigDecimal n.to_s unless n.kind_of? BigDecimal
+      @units.each.with_index do |name, index|
+        in_unit = n / @multiple ** index
+        next if in_unit >= @multiple && index < @units.size - 1
+        prec = 0 if index == 0
+        n = in_unit
+        n = n.round prec if prec >= 0
+        n = DecFmt.new(n).to_s prec
+        return "#{n}#{name}"
+      end
+    end
+  end
+
+  SIZE_FMT = NumFmt.new 1024, %w( B KiB MiB GiB TiB )
+  def self.size(*args, &block); SIZE_FMT.format *args, &block end
 end
 
 end

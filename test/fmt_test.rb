@@ -36,6 +36,22 @@ class FmtTest < Minitest::Test
     d = BigDecimal d if String === d
     Fmt.dec d
   end
+
+  def test_NumFmt
+    fmt = Fmt::NumFmt.new(1000, ['', 'k', 'm'])
+    assert_equal "-1", fmt.format(-1)
+    assert_equal "0", fmt.format(0)
+    assert_equal "1", fmt.format(1)
+    assert_equal "1", fmt.format(1, 1)
+    assert_equal "999", fmt.format(999)
+    assert_equal "1k", fmt.format(1000, 0)
+    assert_equal "1.9k", fmt.format(1900, 1)
+    assert_equal "2k", fmt.format(1900)
+    assert_equal "1.5k", fmt.format(1500, 1)
+    assert_equal "2k", fmt.format(1500)
+    assert_equal "1000m", fmt.format(1_000_000_000, 0)
+    assert_equal "1000m", fmt.format(1_000_000_001, 0)
+  end
 end
 
 end # Utils
