@@ -74,7 +74,7 @@ module Fmt
   end
 
   SIZE_FMT = NumFmt.new 1024, %w( B KiB MiB GiB TiB )
-  def self.size(*args, &block); SIZE_FMT.format *args, &block end
+  def self.size(n, prec=1); SIZE_FMT.format n, prec end
 end
 
 end
