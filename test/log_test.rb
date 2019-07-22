@@ -65,8 +65,12 @@ DEBUG foo: test1... TIME0
 EOS
 
     clear[]
+    debug_block_run = 0
     log.level = :info
     log.debug "some debug"
+    log.debug "some debug 2" do
+      debug_block_run += 1
+    end
     log.info "some info"
     log.sub("foo").debug "some debug 2"
     log.sub("foo").info "some info 2"
@@ -74,6 +78,7 @@ EOS
  INFO some info
  INFO foo: some info 2
 EOS
+    assert_equal 1, debug_block_run
   end
 
   private def replace_times(s)

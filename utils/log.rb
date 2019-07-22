@@ -42,7 +42,11 @@ class Log
   end
 
   private def log(level, *args, &block)
-    puts *args, level: level, &block if find_level(level) >= @level_idx
+    if find_level(level) < @level_idx
+      block.call if block
+      return
+    end
+    puts *args, level: level, &block
   end
 
   def print(*args, **opts, &block)
