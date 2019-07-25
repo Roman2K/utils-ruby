@@ -58,6 +58,9 @@ class UtilsTest < Minitest::Test
   end
 
   def test_path_diff
+    assert_equal "",
+      Utils.path_diff("", "")
+
     assert_equal "foo/bar",
       Utils.path_diff("foo/bar", "foo/bar")
 
@@ -75,5 +78,15 @@ class UtilsTest < Minitest::Test
 
     assert_equal "foo/ba{r => }",
       Utils.path_diff("foo/bar", "foo/ba")
+
+    assert_equal "fo{ => ' '}o/ba{r => }",
+      Utils.path_diff("foo/bar", "fo o/ba")
+
+    assert_equal \
+      "{'► ' => CA}P{la => 'TAINE ROSHI - Freest'}y{ => le} { => 'COUVRE FEU Hors-Série sur OKLM R'}a{ll => dio}",
+      Utils.path_diff(
+        "► Play all",
+        "CAPTAINE ROSHI - Freestyle COUVRE FEU Hors-Série sur OKLM Radio"
+      )
   end
 end
