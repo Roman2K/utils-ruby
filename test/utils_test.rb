@@ -56,4 +56,24 @@ class UtilsTest < Minitest::Test
     run = 0; Utils.retry(2, err) { |n| run += 1; raise "some err" if run == 1 }
     assert_equal 2, run
   end
+
+  def test_path_diff
+    assert_equal "foo/bar",
+      Utils.path_diff("foo/bar", "foo/bar")
+
+    assert_equal "foo{ => xy}/bar",
+      Utils.path_diff("foo/bar", "fooxy/bar")
+
+    assert_equal "foo{ => xy}/b{a => yz}r",
+      Utils.path_diff("foo/bar", "fooxy/byzr")
+
+    assert_equal "foo{xy => }/b{yz => a}r",
+      Utils.path_diff("fooxy/byzr", "foo/bar")
+
+    assert_equal "foo/b{a => }r",
+      Utils.path_diff("foo/bar", "foo/br")
+
+    assert_equal "foo/ba{r => }",
+      Utils.path_diff("foo/bar", "foo/ba")
+  end
 end

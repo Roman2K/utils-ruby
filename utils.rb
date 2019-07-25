@@ -1,4 +1,5 @@
 require 'pathname'
+require_relative 'utils/pathdiff'
 
 module Utils
   def self.util_autoload(name, path)
