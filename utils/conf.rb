@@ -18,6 +18,11 @@ class Conf
     key.to_s.split(".").inject(self) { |c,k| c.at k }
   end
 
+  def lookup(key)
+    self[key]
+  rescue KeyError
+  end
+
   protected def at(key)
     val = @h.fetch key do
       @h.fetch(Symbol === key ? key.to_s : key.to_sym) do

@@ -20,6 +20,8 @@ class ConfTest < Minitest::Test
     assert_equal 1, conf["a"]
     assert_equal 2, conf[:b][:c]
     assert_equal 2, conf["b.c"]
+    assert_equal 2, conf.lookup("b.c")
+    assert_nil conf.lookup("b.xxx")
 
     err = assert_raises KeyError do
       conf[:x]
