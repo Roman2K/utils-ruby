@@ -1,4 +1,5 @@
 require 'pathname'
+require 'timeout'
 require_relative 'utils/pathdiff'
 
 module Utils
@@ -8,6 +9,7 @@ module Utils
 
   util_autoload :Log, 'log'
   util_autoload :QBitTorrent, 'qbittorrent'
+  util_autoload :PVR, 'pvr'
   util_autoload :Fmt, 'fmt'
   util_autoload :Conf, 'conf'
 
@@ -53,6 +55,24 @@ module Utils
         sleep w
       end
       retry
+    end
+  end
+
+  def self.try_conn!(*args, &block)
+    ConnError.may_raise do
+      Timeout.timeout *args, &block
+    end
+  end
+
+  class ConnError < StandardError
+    def self.may_raise
+      yield
+    rescue Timeout::Error, Errno::ECONNREFUSED
+      raise self
+    end
+
+    def to_s
+      "connection error: %p" % cause
     end
   end
 end
