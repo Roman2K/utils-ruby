@@ -4,7 +4,7 @@ require_relative '../utils'
 module Utils
 
 class ConfTest < Minitest::Test
-  def test_get
+  def test_brackets
     conf = Conf.new \
       a: 1,
       b: {
@@ -39,6 +39,30 @@ class ConfTest < Minitest::Test
       assert_equal "/my/home/foo", conf[:some_path2]
       assert_equal "~~foo", conf[:some_path3]
     end
+  end
+
+  def test_include
+    conf = Conf.new \
+      a: 1,
+      b: {include: __dir__ + "/conf_incl_b.yml"},
+      c: {include: __dir__ + "/conf_incl_c.yml"}
+    assert_equal 1, conf[:a]
+    assert_equal 2, conf[:b]
+    assert_equal 3, conf[:c][:d]
+
+    resolve = -> path do
+      conf.resolve_path(Pathname(path)).to_s
+    end
+
+    conf = Conf.new({})
+    assert_equal "/a",  resolve["/a"]
+    assert_equal "./a", resolve["./a"]
+    assert_equal "a",   resolve["a"]
+
+    conf = Conf.new({}, load_path: ["some/dir"])
+    assert_equal "/a",          resolve["/a"]
+    assert_equal "some/dir/a",  resolve["./a"]
+    assert_equal "a",           resolve["a"]
   end
 end
 
