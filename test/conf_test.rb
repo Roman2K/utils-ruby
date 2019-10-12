@@ -64,6 +64,13 @@ class ConfTest < Minitest::Test
     assert_equal "some/dir/a",  resolve["./a"]
     assert_equal "a",           resolve["a"]
   end
+
+  def test_slice
+    assert_raises KeyError do
+      Conf.new({a: 1}).slice(:a, :b)
+    end
+    assert_equal({a: 1}, Conf.new({a: 1}).slice(:a))
+  end
 end
 
 end

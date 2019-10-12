@@ -36,6 +36,10 @@ class Conf
     key.to_s.split(".").inject(self) { |c,k| c.at k }
   end
 
+  def slice(*keys)
+    keys.each_with_object({}) { |k,h| h[k] = self[k] }
+  end
+
   def lookup(key)
     self[key]
   rescue KeyError
