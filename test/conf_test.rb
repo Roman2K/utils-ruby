@@ -66,10 +66,30 @@ class ConfTest < Minitest::Test
   end
 
   def test_slice
+    conf = Conf.new({a: 1})
     assert_raises KeyError do
-      Conf.new({a: 1}).slice(:a, :b)
+      conf.slice(:a, :b)
     end
-    assert_equal({a: 1}, Conf.new({a: 1}).slice(:a))
+    assert_equal({a: 1}, conf.slice(:a))
+  end
+
+  def test_values_at
+    conf = Conf.new({a: 1})
+    assert_raises KeyError do
+      conf.values_at(:a, :b)
+    end
+    assert_equal [1], conf.values_at(:a)
+  end
+
+  def test_to_hash
+    h = Conf.new({a: 1}).to_hash
+    assert_equal [:a], h.keys
+    assert_equal [1], h.values
+
+    h = Conf.new({a: {b: 1}}).to_hash
+    assert_equal [:a], h.keys
+    assert_kind_of Conf, h.fetch(:a)
+    assert_equal 1, h.fetch(:a)[:b]
   end
 end
 

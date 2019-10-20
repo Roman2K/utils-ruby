@@ -40,6 +40,14 @@ class Conf
     keys.each_with_object({}) { |k,h| h[k] = self[k] }
   end
 
+  def values_at(*keys)
+    keys.map { |k| self[k] }
+  end
+
+  def to_hash
+    keys.inject({}) { |h,k| h[k] = self[k]; h }
+  end
+
   def lookup(key)
     self[key]
   rescue KeyError
