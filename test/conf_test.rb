@@ -33,7 +33,7 @@ class ConfTest < Minitest::Test
     end
     assert_match /missing key: b\.x/, err.message
 
-    Conf.stub :home, "/my/home" do
+    Utils.stub :home, "/my/home" do
       assert_equal "/my/home", conf[:home]
       assert_equal "/my/home/foo", conf[:some_path]
       assert_equal "/my/home/foo", conf[:some_path2]

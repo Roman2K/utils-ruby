@@ -91,18 +91,8 @@ class Conf
     [*@path, key].join "."
   end
 
-  def self.home; ENV.fetch "HOME" end
-
   private def string_val(val)
-    expand_tilde val
-  end
-
-  private def expand_tilde(path)
-    case path
-    when %r{\A~(/.*|\z)} then self.class.home + $1
-    when %r{\A~([^~].*)} then "#{self.class.home}/#{$1}"
-    else path
-    end
+    Utils.expand_tilde val
   end
 
   def resolve_path(path)

@@ -75,4 +75,19 @@ module Utils
       "connection error: %p" % cause
     end
   end
+
+  def self.home; ENV.fetch "HOME" end
+
+  def self.expand_tilde(path)
+    was_pathname = Pathname === path
+    path = path.to_s
+    path =
+      case path
+      when %r{\A~(/.*|\z)} then home + $1
+      when %r{\A~([^~].*)} then "#{home}/#{$1}"
+      else path
+      end
+    path = Pathname path if was_pathname
+    path
+  end
 end
