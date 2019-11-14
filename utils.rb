@@ -12,6 +12,7 @@ module Utils
   util_autoload :PVR, 'pvr'
   util_autoload :Fmt, 'fmt'
   util_autoload :Conf, 'conf'
+  util_autoload :Influx, 'influx'
 
   def self.df(path, block_size)
     path = path.to_s if Pathname === path
