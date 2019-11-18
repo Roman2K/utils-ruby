@@ -77,7 +77,7 @@ class Log
 
       t0 = Time.now
       yield.tap do
-        time = " %.2fs" % [Time.now - t0]
+        time = " %s" % [Fmt.duration(Time.now - t0)]
         if @lock.cur_id == id
           msg = time
         else
