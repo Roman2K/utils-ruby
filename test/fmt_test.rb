@@ -51,6 +51,7 @@ class FmtTest < Minitest::Test
     assert_equal "2k", fmt.format(1500)
     assert_equal "1000m", fmt.format(1_000_000_000, 0)
     assert_equal "1000m", fmt.format(1_000_000_001, 0)
+    assert_equal "1 KiB", Fmt::SIZE_FMT.format(1024)
   end
 end
 

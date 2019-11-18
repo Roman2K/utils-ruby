@@ -54,9 +54,10 @@ module Fmt
   end
 
   class NumFmt
-    def initialize(multiple, units)
+    def initialize(multiple, units, &fmt)
       @multiple = multiple
       @units = units
+      @fmt = fmt || -> n,u { "#{n}#{u}" }
     end
 
     def format(n, prec=0)
@@ -68,12 +69,13 @@ module Fmt
         n = in_unit
         n = n.round prec if prec >= 0
         n = DecFmt.new(n).to_s prec
-        return "#{n}#{name}"
+        return @fmt[n, name]
       end
+      raise "shound't happen"
     end
   end
 
-  SIZE_FMT = NumFmt.new 1024, %w( B KiB MiB GiB TiB )
+  SIZE_FMT = NumFmt.new(1024, %w[B KiB MiB GiB TiB]) { |n,u| "#{n} #{u}" }
   def self.size(n, prec=1); SIZE_FMT.format n, prec end
 end
 
