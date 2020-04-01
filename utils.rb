@@ -37,25 +37,44 @@ module Utils
     end
   end
 
-  def self.retry(attempts, *excs, wait: nil)
-    attempts > 0 or return
-    cur = 1
-    begin
-      return yield cur
-    rescue => exc
-      case exc
-      when *excs
-      else raise
-      end
-      attempts -= 1
-      attempts > 0 or raise
-      cur += 1
-      if w = wait
-        w = w[] if Proc === w
+  def self.retry(attempts, *excs, wait: nil, &block)
+    Retrier.new(attempts, *excs).
+      tap { |r| r.wait = wait }.
+      attempt &block
+  end
+
+  class Retrier
+    def initialize(attempts, *excs)
+      @attempts, @excs = attempts, excs
+      @before_wait = -> w do
         $stderr.puts "waiting %.1fs before retrying..." % [w]
-        sleep w
       end
-      retry
+    end
+
+    attr_writer :wait, :on_err, :before_wait
+
+    def attempt
+      attempts = @attempts
+      attempts > 0 or return
+      cur = 1
+      begin
+        return yield cur
+      rescue => exc
+        case exc
+        when *@excs
+          @on_err[exc] if @on_err
+        else raise
+        end
+        attempts -= 1
+        attempts > 0 or raise
+        cur += 1
+        if w = @wait
+          w = w[] if Proc === w
+          @before_wait[w] if @before_wait
+          sleep w
+        end
+        retry
+      end
     end
   end
 
