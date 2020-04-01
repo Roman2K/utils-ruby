@@ -24,7 +24,7 @@ class QBitTorrent
     downloading.each { |t| resume t if t.fetch("state") == "pausedDL" }
   end
 
-  %i( all downloading completed paused active inactive ).each do |filter|
+  %i[all downloading completed paused active inactive].each do |filter|
     define_method filter do |*args, **opts, &block|
       torrents *args, filter: filter, **opts, &block
     end
@@ -106,7 +106,7 @@ class QBitTorrent
 
   private def request!(*args, &block)
     request(*args, &block).tap do |res|
-      res.kind_of? Net::HTTPSuccess or raise "unpexpected response: %p" % res
+      res.kind_of? Net::HTTPSuccess or raise "unexpected response: %p" % res
     end
   end
 end

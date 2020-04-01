@@ -51,7 +51,7 @@ module PVR
     protected def get_response!(uri)
       http = Net::HTTP.new uri.host, uri.port
       http.use_ssl = uri.scheme == 'https'
-      %i( open ssl read write ).each do |op|
+      %i[open ssl read write].each do |op|
         meth = :"#{op}_timeout="
         http.public_send meth, @timeout if http.respond_to? meth
       end
