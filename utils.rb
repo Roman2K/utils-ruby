@@ -78,6 +78,11 @@ module Utils
     end
   end
 
+  def self.is_unavail?(err)
+    ConnError === err \
+      || /^unexpected response\b.*\b502\b/ === err.message
+  end
+
   def self.try_conn!(*args, &block)
     ConnError.may_raise do
       Timeout.timeout *args, &block

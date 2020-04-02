@@ -97,11 +97,15 @@ class QBitTorrent
     Utils.merge_uri @uri, *args, &block
   end
 
+  TIMEOUT = 20
+
   private def request(*args, &block)
-    Net::HTTP.
-      start(@uri.host, @uri.port, use_ssl: @uri.scheme == 'https') do |http|
-        http.request *args, &block
-      end
+    Utils.try_conn! TIMEOUT do
+      Net::HTTP.
+        start(@uri.host, @uri.port, use_ssl: @uri.scheme == 'https') do |http|
+          http.request *args, &block
+        end
+    end
   end
 
   private def request!(*args, &block)
