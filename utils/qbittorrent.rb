@@ -81,7 +81,7 @@ class QBitTorrent
     req.form_data = {'username' => user, 'password' => password}
 
     @cookie = request!(req)['set-cookie'].
-      tap { |s| s or raise "failed login: %s" % res.body }.
+      tap { |s| s or raise "failed login" }.
       split(";", 2).
       fetch(0)
   end
