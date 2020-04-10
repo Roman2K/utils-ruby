@@ -6,6 +6,12 @@ class UtilsTest < Minitest::Test
     assert_equal URI("http://v.xyz/a/b"),
       Utils.merge_uri("http://v.xyz/a", "/b")
 
+    assert_equal URI("http://v.xyz/b"),
+      Utils.merge_uri("http://v.xyz", "/b")
+
+    assert_equal URI("http://v.xyz/b"),
+      Utils.merge_uri("http://v.xyz/", "/b")
+
     assert_equal URI("http://v.xyz/a/b?c=1"),
       Utils.merge_uri("http://v.xyz/a?c=1", "/b")
 
@@ -17,6 +23,38 @@ class UtilsTest < Minitest::Test
 
     assert_equal URI("http://v.xyz/a?c=2"),
       Utils.merge_uri("http://v.xyz/a?c=1", c: 2)
+
+    assert_equal URI("http://foo"),
+      Utils.merge_uri("http://foo", "http://foo")
+
+    assert_equal URI("http://foo/bar"),
+      Utils.merge_uri("http://foo", "http://foo/bar")
+
+    assert_equal URI("http://foo/bar/baz"),
+      Utils.merge_uri("http://foo/bar", "http://foo/baz")
+
+    err = assert_raises Utils::URIEndpointMismatch do
+      Utils.merge_uri("http://foo", "https://foo")
+    end
+    assert_match /: port, scheme/, err.message
+
+    assert_raises Utils::URIEndpointMismatch do
+      Utils.merge_uri("http://foo:81", "http://foo")
+    end
+
+    assert_raises Utils::URIEndpointMismatch do
+      Utils.merge_uri("http://foo", "http://foox")
+    end
+  end
+
+  def test_concat_uri_paths
+    concat = Utils.method :concat_uri_paths
+    assert_equal "/", concat["", ""]
+    assert_equal "/", concat["/", ""]
+    assert_equal "/", concat["", "/"]
+    assert_equal "/a", concat["/", "/a"]
+    assert_equal "/b/", concat["/b", "/"]
+    assert_equal "/b/c", concat["/b", "/c"]
   end
 
   def test_retry
