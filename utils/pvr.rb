@@ -5,29 +5,51 @@ module Utils
 
 module PVR
   class Basic
-    DEFAULT_TIMEOUT = 20
+    DEFAULT_TIMEOUT = 60
 
     def initialize(uri, timeout: DEFAULT_TIMEOUT, log:)
-      @uri = uri
+      @http = SimpleHTTP.new uri, json: true, log: log
       @log = log
       @timeout = timeout
     end
 
     def history
-      fetch_all(add_uri("/history", page: 1)).to_a
+      fetch_all(["/history", page: 1]).to_a
+    end
+
+    def commands
+      @http.get "/command"
+    end
+
+    def downloaded_scan(path, download_client_id: nil, import_mode: nil)
+      @http.post "/command", {}.tap { |body|
+        body["name"] = self.class::CMD_DOWNLOADED_SCAN
+        body["path"] = path
+        body["downloadClientId"] = download_client_id if download_client_id
+        body["importMode"] = import_mode if import_mode
+      }
+    end
+
+    def command(id)
+      @http.get "/command/#{id}"
+    end
+
+    def entity(id)
+      @http.get "#{self.class::ENDPOINT_ENTITY}/#{id}"
     end
 
     protected def fetch_all(uri)
       return enum_for __method__, uri unless block_given?
       fetched = 0
       total = nil
-      uri = Utils.merge_uri uri, pageSize: 200
+      uri = uri.yield_self do |path, params={}|
+        Utils.merge_uri path, pageSize: 200, **params
+      end
       loop do
         Hash[URI.decode_www_form(uri.query || "")].
           slice("page", "pageSize").
           tap { |h| @log.debug "fetching %p of %s" % [h, uri] }
-        resp = get_response! uri
-        data = JSON.parse resp.body
+        data = @http.get uri
         total = data.fetch "totalRecords"
         page = data.fetch "page"
         if fetched <= 0 && page > 1
@@ -43,32 +65,18 @@ module PVR
         uri = Utils.merge_uri uri, page: page + 1
       end
     end
-
-    protected def add_uri(*args, &block)
-      Utils.merge_uri @uri, *args, &block
-    end
-
-    protected def get_response!(uri)
-      http = Net::HTTP.new uri.host, uri.port
-      http.use_ssl = uri.scheme == 'https'
-      %i[open ssl read write].each do |op|
-        meth = :"#{op}_timeout="
-        http.public_send meth, @timeout if http.respond_to? meth
-      end
-
-      ConnError.may_raise {
-        http.start { http.request_get uri }
-      }.tap { |resp|
-        resp.kind_of? Net::HTTPSuccess \
-          or raise "unexpected response: %p (%s)" % [resp, resp.body]
-      }
-    end
   end
 
   class Radarr < Basic
+    CMD_DOWNLOADED_SCAN = "DownloadedMoviesScan"
+    ENDPOINT_ENTITY = "/movie"
+    def history_entity_id(ev); ev.fetch "movieId" end
   end
 
   class Sonarr < Basic
+    CMD_DOWNLOADED_SCAN = "DownloadedEpisodesScan"
+    ENDPOINT_ENTITY = "/episode"
+    def history_entity_id(ev); ev.fetch "episodeId" end
   end
 end # PVR
 
