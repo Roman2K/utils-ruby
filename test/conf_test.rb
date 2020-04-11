@@ -5,7 +5,7 @@ module Utils
 
 class ConfTest < Minitest::Test
   def test_brackets
-    conf = Conf.new \
+    conf = Conf.new({
       a: 1,
       b: {
         c: 2,
@@ -14,7 +14,8 @@ class ConfTest < Minitest::Test
       home: "~",
       some_path: "~/foo",
       some_path2: "~foo",
-      some_path3: "~~foo"
+      some_path3: "~~foo",
+    })
 
     assert_equal 1, conf[:a]
     assert_equal 1, conf["a"]
@@ -42,10 +43,11 @@ class ConfTest < Minitest::Test
   end
 
   def test_include
-    conf = Conf.new \
+    conf = Conf.new({
       a: 1,
       b: {include: __dir__ + "/conf_incl_b.yml"},
-      c: {include: __dir__ + "/conf_incl_c.yml"}
+      c: {include: __dir__ + "/conf_incl_c.yml"},
+    })
     assert_equal 1, conf[:a]
     assert_equal 2, conf[:b]
     assert_equal 3, conf[:c][:d]

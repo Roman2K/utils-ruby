@@ -4,29 +4,42 @@ module Utils
 
 class SimpleHTTP
   def initialize(uri, timeout: nil, json: false, log: Log.new)
-    @base_uri, @client = uri_or_client uri
+    @base_uri, @get_client = uri_or_client uri
     @timeout = timeout
     @type_config = TypeConf.new json: json
     @log = log
   end
 
+  private def start
+    cli = @get_client[]
+    if cli.started?
+      yield cli
+    else
+      cli.start { yield cli }
+    end
+  end
+
   private def uri_or_client(uri)
-    uri, client =
-      if uri.respond_to?(:start) && uri.respond_to?(:request)
-        [URI("/"), uri]
-      else
-        uri = URI uri
-        client = Net::HTTP.new uri.host, uri.port
-        client.use_ssl = (uri.scheme == 'https')
-        [uri, client]
+    if uri.respond_to?(:start) && uri.respond_to?(:request)
+      if @timeout
+        @log.warn "timeout won't be applied to previously instantiated client"
       end
+      client, uri = uri, URI("/")
+      return uri, ->{ client }
+    end
 
-    %i[open ssl read write].each do |op|
-      meth = :"#{op}_timeout="
-      client.public_send meth, @timeout if client.respond_to? meth
-    end if @timeout
+    uri = URI uri
+    get_client = -> do
+      Net::HTTP.new(uri.host, uri.port).tap do |http|
+        http.use_ssl = (uri.scheme == 'https')
+        %i[open ssl read write continue].each do |op|
+          meth = :"#{op}_timeout="
+          http.public_send meth, @timeout if http.respond_to? meth
+        end
+      end
+    end
 
-    [uri, client]
+    [uri, get_client]
   end
 
   class TypeConf
@@ -74,7 +87,7 @@ class SimpleHTTP
 
   private def request(req, expect:, **opts)
     @log["#{req.method} #{req.path}"].debug "executing HTTP request"
-    case resp = @client.request(req)
+    case resp = start { |http| http.request(req) }
     when *expect
     else
       raise "unexpected response: #{resp.code} (#{resp.body})"
@@ -87,7 +100,7 @@ class SimpleHTTP
   end
 
   private def request_body(cls, path, payload, expect:, **opts)
-    req = new_rew cls, path
+    req = new_req cls, path
     if @type_config.merge(opts).json_in && !payload.kind_of?(String)
       req['Content-Type'] = "application/json"
       payload = JSON.dump payload 

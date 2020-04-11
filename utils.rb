@@ -1,5 +1,6 @@
 require 'pathname'
 require 'timeout'
+require 'uri'
 require_relative 'utils/pathdiff'
 
 module Utils
@@ -14,6 +15,7 @@ module Utils
   util_autoload :Conf, 'conf'
   util_autoload :Influx, 'influx'
   util_autoload :SimpleHTTP, 'simple_http'
+  util_autoload :IOUtils, 'ioutils'
 
   def self.df(path, block_size)
     path = path.to_s if Pathname === path
