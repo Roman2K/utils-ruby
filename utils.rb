@@ -32,6 +32,15 @@ module Utils
     (df(path, 'K', **opts, &block) * 1024).to_i
   end
 
+  def self.du_bytes(path)
+    IO.popen(["du", "-sb", path], &:read).
+      tap { $?.success? or raise "du failed" }.
+      split("\n").
+      tap { |ls| ls.size == 1 or raise "unexpected number of lines" }.
+      fetch(0).split(/\s+/).
+      fetch(0).to_i
+  end
+
   def self.merge_uri(a, b=nil, params={})
     b, params = URI(""), b if b.kind_of?(Hash) && params == {}
     a, b = URI(a), URI(b)
