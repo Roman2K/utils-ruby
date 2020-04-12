@@ -17,14 +17,19 @@ module Utils
   util_autoload :SimpleHTTP, 'simple_http'
   util_autoload :IOUtils, 'ioutils'
 
-  def self.df(path, block_size)
+  def self.df(path, block_size, col: :avail)
+    col = {avail: -3, used: -4}.fetch col
     path = path.to_s if Pathname === path
     IO.popen(["df", "-B#{block_size}", path], &:read).
       tap { $?.success? or raise "df failed" }.
       split("\n").
       tap { |ls| ls.size == 2 or raise "unexpected number of lines" }.
       fetch(1).split(/\s+/).
-      fetch(-3).chomp(block_size).to_f
+      fetch(col).chomp(block_size).to_f
+  end
+
+  def self.df_bytes(path, **opts, &block)
+    (df(path, 'K', **opts, &block) * 1024).to_i
   end
 
   def self.merge_uri(a, b=nil, params={})
