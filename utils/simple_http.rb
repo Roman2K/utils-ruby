@@ -88,12 +88,15 @@ class SimpleHTTP
 
   private def request(req, expect:, **opts)
     @log["#{req.method} #{req.path}"].debug "executing HTTP request"
+    json_out = @type_config.merge(opts).json_out
+    req['Accept'] = 'application/json' if json_out
+    yield req if block_given?
     case resp = start { |http| http.request(req) }
     when *expect
     else
       raise "unexpected response: #{resp.code} (#{resp.body})"
     end
-    if @type_config.merge(opts).json_out
+    if json_out
       JSON.parse resp.body
     else
       resp
