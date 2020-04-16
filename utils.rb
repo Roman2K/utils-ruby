@@ -78,9 +78,9 @@ module Utils
   end
 
   def self.retry(attempts, *excs, wait: nil, &block)
-    Retrier.new(attempts, *excs).
-      tap { |r| r.wait = wait }.
-      attempt &block
+    r = Retrier.new(attempts, *excs)
+    r.wait = wait
+    r.attempt &block
   end
 
   class Retrier

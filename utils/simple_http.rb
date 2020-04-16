@@ -93,8 +93,7 @@ class SimpleHTTP
     yield req if block_given?
     case resp = start { |http| http.request(req) }
     when *expect
-    else
-      raise "unexpected response: #{resp.code} (#{resp.body})"
+    else raise "unexpected response: #{resp.code} (#{resp.body})"
     end
     if json_out
       JSON.parse resp.body
