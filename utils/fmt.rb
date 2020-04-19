@@ -13,8 +13,8 @@ module Fmt
     end.sub /([a-z])(0[a-z])+$/, '\1'
   end
 
-  def self.d(d, *args, &block)
-    dec(d).to_s *args, &block
+  def self.d(d, *args, **opts, &block)
+    dec(d).to_s *args, **opts, &block
   end
 
   def self.dec(*args, &block)
@@ -71,7 +71,7 @@ module Fmt
         n = DecFmt.new(n).to_s prec
         return @fmt[n, name]
       end
-      raise "shound't happen"
+      raise "shouldn't happen"
     end
   end
 

@@ -35,7 +35,7 @@ class QBitTorrent
     q = {filter: filter}
     uri = add_uri "/api/v2/torrents/info", q.reject { |k,v| v.nil? }
 
-    JSON.parse(get!(uri).body).tap do |ts|
+    get_json!(uri).tap do |ts|
       @log[q: q].debug "fetched %d torrents" % ts.size
     end
   end
@@ -64,6 +64,10 @@ class QBitTorrent
 
   private def get!(path)
     request! new_req(:Get, path)
+  end
+
+  private def get_json!(uri)
+    JSON.parse(get!(uri).body)
   end
 
   private def post!(path, data)

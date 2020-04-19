@@ -80,6 +80,11 @@ class SimpleHTTP
       **opts, &block
   end
 
+  def delete(*args, **opts, &block)
+    request_body Net::HTTP::Delete, *args, expect: [Net::HTTPOK],
+      **opts, &block
+  end
+
   private def new_req(cls, uri)
     uri = Utils.merge_uri(@base_uri, *uri)
     uri = uri.to_s unless uri.respond_to? :request_uri

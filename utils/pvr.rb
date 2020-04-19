@@ -7,8 +7,8 @@ module PVR
   class Basic
     DEFAULT_TIMEOUT = 60
 
-    def initialize(uri, timeout: DEFAULT_TIMEOUT, log:)
-      @http = SimpleHTTP.new uri, json: true, log: log
+    def initialize(uri, timeout: DEFAULT_TIMEOUT, log: Log.new)
+      @http = SimpleHTTP.new uri, json: true, timeout: timeout, log: log
       @log = log
       @timeout = timeout
     end
@@ -36,6 +36,20 @@ module PVR
 
     def entity(id)
       @http.get "#{self.class::ENDPOINT_ENTITY}/#{id}"
+    end
+
+    def queue
+      @http.get "/queue"
+    end
+
+    def queue_del(id, blacklist: nil)
+      params = {}
+      params[:blacklist] = "true" if blacklist
+      @http.delete ["/queue/#{id}", params], nil
+    end
+
+    def name
+      self.class::NAME
     end
 
     protected def fetch_all(uri)
@@ -68,14 +82,16 @@ module PVR
   end
 
   class Radarr < Basic
-    CMD_DOWNLOADED_SCAN = "DownloadedMoviesScan"
-    ENDPOINT_ENTITY = "/movie"
+    NAME = "Radarr".freeze
+    CMD_DOWNLOADED_SCAN = "DownloadedMoviesScan".freeze
+    ENDPOINT_ENTITY = "/movie".freeze
     def history_entity_id(ev); ev.fetch "movieId" end
   end
 
   class Sonarr < Basic
-    CMD_DOWNLOADED_SCAN = "DownloadedEpisodesScan"
-    ENDPOINT_ENTITY = "/episode"
+    NAME = "Sonarr".freeze
+    CMD_DOWNLOADED_SCAN = "DownloadedEpisodesScan".freeze
+    ENDPOINT_ENTITY = "/episode".freeze
     def history_entity_id(ev); ev.fetch "episodeId" end
   end
 end # PVR
