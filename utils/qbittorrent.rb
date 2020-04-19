@@ -13,7 +13,7 @@ class QBitTorrent
   end
 
   def download_limit=(n)
-    @log.info "setting download limit to: %d bytes" % n
+    @log.debug "setting download limit to: %d bytes" % n
     post! "/api/v2/transfer/setDownloadLimit", 'limit' => n
   end
 
@@ -40,9 +40,15 @@ class QBitTorrent
     end
   end
 
+  def recheck(ts)
+    post_hashes! "/api/v2/torrents/recheck", ts do |log|
+      log.debug "rechecking"
+    end
+  end
+
   def delete_perm(ts)
     post_hashes! "/api/v2/torrents/delete", ts, 'deleteFiles' => 'true' do |log|
-      log.info "deleting (with data)"
+      log.debug "deleting (with data)"
     end
   end
 
@@ -52,13 +58,13 @@ class QBitTorrent
 
   private def pause(ts)
     post_hashes! "/api/v2/torrents/pause", ts do |log|
-      log.info "pausing"
+      log.debug "pausing"
     end
   end
 
   private def resume(ts)
     post_hashes! "/api/v2/torrents/resume", ts do |log|
-      log.info "resuming"
+      log.debug "resuming"
     end
   end
 
