@@ -38,6 +38,7 @@ module Utils
       split("\n").
       tap { |ls| ls.size == 1 or raise "unexpected number of lines" }.
       fetch(0).split(/\s+/).
+      tap { |cols| cols.size == 2 or raise "unexpected number of columns" }.
       fetch(0).to_i
   end
 
