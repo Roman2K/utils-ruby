@@ -32,14 +32,23 @@ module Utils
     (df(path, 'K', **opts, &block) * 1024).to_i
   end
 
+  class DUFailedError < StandardError; end
+
   def self.du_bytes(path)
+    path = path.to_s if Pathname === path
     IO.popen(["du", "-sb", path], &:read).
-      tap { $?.success? or raise "du failed" }.
+      tap { $?.success? or raise DUFailedError }.
       split("\n").
       tap { |ls| ls.size == 1 or raise "unexpected number of lines" }.
-      fetch(0).split(/\s+/).
+      fetch(0).split(/\s+/, 2).
       tap { |cols| cols.size == 2 or raise "unexpected number of columns" }.
       fetch(0).to_i
+  end
+
+  def self.du_bytes_retry(*args, **opts, &block)
+    self.retry 5, DUFailedError, wait: ->{ 1 + rand } do
+      du_bytes *args, **opts, &block
+    end
   end
 
   def self.merge_uri(a, b=nil, params={})
