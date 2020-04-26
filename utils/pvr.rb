@@ -13,13 +13,13 @@ module PVR
       @timeout = timeout
     end
 
-    def history
-      fetch_all(["/history", page: 1]).to_a
-    end
-
-    def commands
-      @http.get "/command"
-    end
+    def name; self.class::NAME end
+    def history_events; fetch_all(["/history", page: 1]) end
+    def history; history_events.to_a end  # backwards compatibility
+    def commands; @http.get "/command" end
+    def command(id); @http.get "/command/#{id}" end
+    def entity(id); @http.get "#{self.class::ENDPOINT_ENTITY}/#{id}" end
+    def queue; @http.get "/queue" end
 
     def downloaded_scan(path, download_client_id: nil, import_mode: nil)
       @http.post "/command", {}.tap { |body|
@@ -30,26 +30,10 @@ module PVR
       }
     end
 
-    def command(id)
-      @http.get "/command/#{id}"
-    end
-
-    def entity(id)
-      @http.get "#{self.class::ENDPOINT_ENTITY}/#{id}"
-    end
-
-    def queue
-      @http.get "/queue"
-    end
-
     def queue_del(id, blacklist: nil)
       params = {}
       params[:blacklist] = "true" if blacklist
       @http.delete ["/queue/#{id}", params], nil
-    end
-
-    def name
-      self.class::NAME
     end
 
     protected def fetch_all(uri)

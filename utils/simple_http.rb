@@ -11,6 +11,8 @@ class SimpleHTTP
     @log = log
   end
 
+  attr_reader :type_config
+
   private def start
     cli = @get_client[]
     if cli.started?
