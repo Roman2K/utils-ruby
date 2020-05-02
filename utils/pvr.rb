@@ -13,6 +13,7 @@ module PVR
       @timeout = timeout
     end
 
+    def to_s; name.to_s end
     def name; self.class::NAME end
     def history_events; fetch_all(["/history", page: 1]) end
     def history; history_events.to_a end  # backwards compatibility
