@@ -9,7 +9,11 @@ class SABnzbd
 
   def history &block; get_slots({mode: "history"}, "history", &block) end
   def queue &block; get_slots({mode: "queue"}, "queue", &block) end
-  def queue_resume; @http.get [mode: "resume"] end
+  def queue_resume_all; @http.get [mode: "resume"] end
+
+  def queue_resume(nzoid)
+    @http.get [mode: "queue", name: "resume", value: nzoid]
+  end
 
   LIMIT = 500
 
