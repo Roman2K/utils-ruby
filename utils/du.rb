@@ -9,9 +9,7 @@ module DU
     path = path.to_s if Pathname === path
     out, err, st = Open3.capture3 "du", "-sb", path
     if !st.success?
-      if err =~ /^du: cannot access '.+?': No such file/i \
-        && err !~ /^du: cannot access '#{Regexp.escape path}': No such file/i \
-      then
+      if err =~ /^du: cannot access '(.+?)': No such file/i && $1 != path
         ##
         # Test:
         #
