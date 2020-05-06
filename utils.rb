@@ -19,15 +19,28 @@ module Utils
   util_autoload :IOUtils, 'ioutils'
   util_autoload :DU, 'du'
 
-  def self.df(path, block_size, col: :avail)
+  def self.df(path, block_size, col: :avail, runner: LocalRunner.new)
     col = {avail: -3, used: -4}.fetch col
     path = path.to_s if Pathname === path
-    IO.popen(["df", "-B#{block_size}", path], &:read).
-      tap { $?.success? or raise "df failed" }.
+    runner.cmd(["df", "-B#{block_size}", path]).stdout!.
       split("\n").
       tap { |ls| ls.size == 2 or raise "unexpected number of lines" }.
       fetch(1).split(/\s+/).
       fetch(col).chomp(block_size).to_f
+  end
+
+  class LocalRunner
+    def cmd(cmd)
+      Command.new(cmd)
+    end
+
+    Command = Struct.new :cmd do
+      def stdout!
+        IO.popen(cmd, &:read).tap do
+          $?.success? or raise "command failed: `#{cmd}`"
+        end
+      end
+    end
   end
 
   def self.df_bytes(path, **opts, &block)
