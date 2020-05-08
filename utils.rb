@@ -83,17 +83,17 @@ module Utils
     end
   end
 
-  def self.retry(attempts, *excs, wait: nil, &block)
-    r = Retrier.new(attempts, *excs)
+  def self.retry(attempts, *excs, wait: nil, **opts, &block)
+    r = Retrier.new(attempts, *excs, **opts)
     r.wait = wait
     r.attempt &block
   end
 
   class Retrier
-    def initialize(attempts, *excs)
+    def initialize(attempts, *excs, log: Log.new)
       @attempts, @excs = attempts, excs
       @before_wait = -> w do
-        $stderr.puts "waiting %.1fs before retrying..." % [w]
+        log.warn "waiting %.1fs before retrying..." % [w]
       end
     end
 
