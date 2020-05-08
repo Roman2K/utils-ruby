@@ -53,12 +53,23 @@ class Log
     puts *args, **opts, eol: false, &block
   end
 
+  private def fmt_exception(e)
+    out = "#{e.class}"
+    if (s = e.to_s) != out
+      out << " (#{s})"
+    end
+    out
+  end
+
   def puts(*msgs, level: :info, eol: true)
     id = @lock.next!
 
     msgs.map! do |msg|
       ("%*s %s" % [LEVELS_W, level.upcase, add_prefix(msg)]).tap do |s|
-        @vars.each { |name, val| s << " %s=%s" % [name, val] }
+        @vars.each do |name, val|
+          val = fmt_exception(val) if Exception === val
+          s << " %s=%s" % [name, val]
+        end
       end
     end
 
