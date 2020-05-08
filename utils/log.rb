@@ -54,11 +54,17 @@ class Log
   end
 
   private def fmt_exception(e)
-    out = "#{e.class}"
-    if (s = e.to_s) != out
-      out << " (#{s})"
+    causes = []
+    loop do
+      out = "#{e.class}"
+      causes << out
+      if (s = e.to_s) != out
+        out << " (#{s})"
+        break
+      end
+      e = e.cause or break
     end
-    out
+    causes.join(" < ")
   end
 
   def puts(*msgs, level: :info, eol: true)
@@ -136,6 +142,10 @@ class Log
         @mu.synchronize { @printing -= 1 }
       end
     end
+  end
+
+  def self.matcher(level, pat)
+    Regexp.new(" *#{Regexp.escape level} +#{pat}", Regexp::IGNORECASE)
   end
 end
 
