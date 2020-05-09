@@ -4,6 +4,11 @@ require 'json'
 module Utils
 
 class SimpleHTTP
+  class Error < StandardError; end
+  class UnexpectedRespError < Error; end
+  class InvalidJSONError < Error; end
+  class NetError < Error; end
+
   def initialize(uri, timeout: nil, json: false, log: Log.new)
     @base_uri, @get_client = uri_or_client uri
     @timeout = timeout
@@ -18,8 +23,19 @@ class SimpleHTTP
     if cli.started?
       yield cli
     else
-      cli.start { yield cli }
+      expect_net_err { cli.start }
+      begin
+        yield cli
+      ensure
+        cli.finish
+      end
     end
+  end
+
+  private def expect_net_err
+    yield
+  rescue Net::ProtocolError, Net::HTTPExceptions
+    raise NetError
   end
 
   private def uri_or_client(uri)
@@ -98,9 +114,11 @@ class SimpleHTTP
     json_out = @type_config.merge(opts).json_out
     req['Accept'] = 'application/json' if json_out
     yield req if block_given?
-    case resp = start { |http| http.request(req) }
+    case resp = start { |http| expect_net_err { http.request(req) } }
     when *expect
-    else raise "unexpected response: #{resp.code} (#{resp.body})"
+    else
+      raise UnexpectedRespError.new \
+        "unexpected response: #{resp.code} (#{resp.body})"
     end
     if json_out
       JSON.parse resp.body
@@ -113,7 +131,11 @@ class SimpleHTTP
     req = new_req cls, path
     if @type_config.merge(opts).json_in && !payload.kind_of?(String)
       req['Content-Type'] = "application/json"
-      payload = JSON.dump payload 
+      payload = begin
+        JSON.dump payload 
+      rescue JSON::ParserError
+        raise InvalidJSONError
+      end
     end
     req.body = payload
     request req, expect: expect, **opts
