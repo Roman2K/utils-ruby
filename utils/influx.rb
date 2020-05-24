@@ -4,7 +4,7 @@ require 'pp'
 module Utils::Influx
   DEFAULT_TIME_PREC = "ms".freeze
 
-  def self.new_client(uri)
+  def self.new_client(uri, **opts)
     unless URI === uri
       uri = "http://#{uri}" unless uri.include? "://"
       uri = URI uri
@@ -14,12 +14,17 @@ module Utils::Influx
     InfluxDB::Client.new db,
       host: uri.host,
       port: uri.port,
-      time_precision: DEFAULT_TIME_PREC
+      time_precision: DEFAULT_TIME_PREC,
+      **opts
   end
 
   class WritesDebug
-    def initialize(client, log, quiet: false)
-      @client, @log, @quiet = client, log, quiet
+    def initialize(client, log, quiet: false, log_level: :info)
+      @client = client
+      @log = log
+      @quiet = quiet
+      @log_level = log_level
+
       @log.puts "logging Influx %p writes to %p" \
         % [client.config.database, @log.io]
     end
@@ -27,7 +32,7 @@ module Utils::Influx
     private def method_missing(m, *args, &block)
       if m =~ /^write/
         args = @quiet ? quiet_args(args) : PP.pp(args, "").chomp
-        @log.puts "Influx#%s(%s)" % [m, args]
+        @log.public_send @log_level, "Influx#%s(%s)" % [m, args]
         return
       end
       @client.public_send m, *args, &block
