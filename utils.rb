@@ -18,6 +18,7 @@ module Utils
   util_autoload :SimpleHTTP, 'simple_http'
   util_autoload :IOUtils, 'ioutils'
   util_autoload :DU, 'du'
+  util_autoload :Events, 'events'
 
   def self.df(path, block_size, col: :avail, runner: LocalRunner.new)
     col = {avail: -3, used: -4}.fetch col
