@@ -9,13 +9,8 @@ module Utils::Influx
       uri = "http://#{uri}" unless uri.include? "://"
       uri = URI uri
     end
-    db = uri.path.sub(%r{^/}, "")
-    !db.empty? or raise "missing db"
-    InfluxDB::Client.new db,
-      host: uri.host,
-      port: uri.port,
-      time_precision: DEFAULT_TIME_PREC,
-      **opts
+    raise "missing db" if uri.path.sub(%r{^/}, "").empty?
+    InfluxDB::Client.new url: uri, time_precision: DEFAULT_TIME_PREC, **opts
   end
 
   class WritesDebug
