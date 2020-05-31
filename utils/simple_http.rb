@@ -5,7 +5,6 @@ module Utils
 
 class SimpleHTTP
   class Error < StandardError; end
-  class UnexpectedRespError < Error; end
   class InvalidJSONError < Error; end
   class NetError < Error; end
 
@@ -116,15 +115,21 @@ class SimpleHTTP
     yield req if block_given?
     case resp = start { |http| expect_net_err { http.request(req) } }
     when *expect
-    else
-      raise UnexpectedRespError.new \
-        "unexpected response: #{resp.code} (#{resp.body})"
+    else raise UnexpectedRespError.new(resp)
     end
     if json_out
       JSON.parse resp.body
     else
       resp
     end
+  end
+
+  class UnexpectedRespError < Error
+    def initialize(resp)
+      super "unexpected response: #{resp.code} (#{resp.body})"
+      @resp = resp
+    end
+    attr_reader :resp
   end
 
   private def request_body(cls, path, payload, expect:, **opts)
