@@ -93,8 +93,8 @@ module Utils
   class Retrier
     def initialize(attempts, *excs, log: Log.new)
       @attempts, @excs = attempts, excs
-      @before_wait = -> w do
-        log.warn "waiting %.1fs before retrying..." % [w]
+      @before_wait = -> w, exc do
+        log[err: exc].warn "waiting %.1fs before retrying..." % [w]
       end
     end
 
@@ -117,7 +117,10 @@ module Utils
         cur += 1
         if w = @wait
           w = w[] if Proc === w
-          @before_wait[w] if @before_wait
+          case @before_wait&.arity
+          when 1 then @before_wait[w]
+          when 2, -1 then @before_wait[w, exc]
+          end
           sleep w
         end
         retry

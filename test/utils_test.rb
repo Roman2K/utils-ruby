@@ -89,9 +89,21 @@ class UtilsTest < Minitest::Test
     res = Utils.retry(2, err) { :val }
     assert_equal :val, res
 
+    # before_wait
+    retrier = Utils::Retrier.new 2, err
+    retrier.wait = 0.01
+    calls = []; retrier.before_wait = -> n, exc { calls << [n, err] }
+    retrier.attempt { |n| raise err if n == 1 }
+    assert_equal [[0.01, err]], calls
+
+    # before_wait - single arg
+    calls = []; retrier.before_wait = -> n { calls << n }
+    retrier.attempt { |n| raise err if n == 1 }
+    assert_equal [0.01], calls
+
     # === matching
     err = -> e { e.message == "some err" }
-    run = 0; Utils.retry(2, err) { |n| run += 1; raise "some err" if run == 1 }
+    run = 0; Utils.retry(2, err) { run += 1; raise "some err" if run == 1 }
     assert_equal 2, run
   end
 
