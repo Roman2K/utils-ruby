@@ -93,6 +93,9 @@ module Utils
   class Retrier
     def initialize(attempts, *excs, log: Log.new)
       @attempts, @excs = attempts, excs
+      @on_err = -> exc do
+        log[err: exc].warn "retriable error" unless @wait
+      end
       @before_wait = -> w, exc do
         log[err: exc].warn "waiting %.1fs before retrying..." % [w]
       end
