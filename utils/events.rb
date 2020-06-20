@@ -5,6 +5,8 @@ class Events
     @cbs = {}
   end
 
+  def events; @cbs.keys end
+
   def on(ev, key=nil, replace: !!key, &cb)
     reg = get_cbs(ev)
     cbs = (reg[key] ||= [])
