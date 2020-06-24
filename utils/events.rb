@@ -6,14 +6,17 @@ class Events
   end
 
   def events; @cbs.keys end
+  def cb_count(ev, key=nil); get_cbs(ev).fetch(key) { return 0 }.size end
 
-  def on(ev, key=nil, replace: !!key, &cb)
+  def on(ev, key=nil, replace: !!key, once: false, &cb)
     reg = get_cbs(ev)
-    cbs = (reg[key] ||= [])
+    cbs = reg[key] ||= []
     cbs.clear if replace
-    cbs << cb
+    cbs << Callback.new(block: cb, once: once)
     self
   end
+
+  Callback = Struct.new :block, :once, keyword_init: true
 
   private def get_cbs(ev)
     @cbs.fetch(ev) { raise "unknown event: %p" % [ev] }
@@ -29,8 +32,9 @@ class Events
 
   def fire(ev, *args)
     get_cbs(ev).each_value do |cbs|
-      cbs.each do |cb|
-        cb.call *args
+      cbs.delete_if do |cb|
+        cb.block.call *args
+        cb.once
       end
     end
     self
