@@ -66,17 +66,18 @@ class Conf
     coerce_val = -> val do
       case val
       when Hash then config_val[val]
+      when Array then val.map &coerce_val
       when String then string_val val
       else val
       end
     end
 
     val = coerce_val[val]
-    if self.class === val && val.keys == %i( include )
+    if self.class === val && val.keys == %i[include]
       val = begin
         config_val[resolve_path(Pathname(string_val val[:include]))]
       rescue InvalidTypeError
-        $!.val
+        coerce_val[$!.val]
       end
     end
 

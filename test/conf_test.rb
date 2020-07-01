@@ -15,6 +15,9 @@ class ConfTest < Minitest::Test
       some_path: "~/foo",
       some_path2: "~foo",
       some_path3: "~~foo",
+      arr: [
+        {foo: {bar: "bar"}},
+      ],
     })
 
     assert_equal 1, conf[:a]
@@ -22,6 +25,7 @@ class ConfTest < Minitest::Test
     assert_equal 2, conf[:b][:c]
     assert_equal 2, conf["b.c"]
     assert_equal 2, conf.lookup("b.c")
+    assert_equal "bar", conf[:arr].fetch(0)["foo.bar"]
     assert_nil conf.lookup("b.xxx")
 
     err = assert_raises KeyError do
