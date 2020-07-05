@@ -21,13 +21,19 @@ module Utils
   util_autoload :Events, 'events'
 
   def self.df(path, block_size, col: :avail, runner: LocalRunner.new)
-    col = {avail: -3, used: -4}.fetch col
     path = path.to_s if Pathname === path
-    runner.cmd(["df", "-B#{block_size}", path]).stdout!.
+    res = runner.cmd(["df", "-B#{block_size}", path]).stdout!.
       split("\n").
       tap { |ls| ls.size == 2 or raise "unexpected number of lines" }.
       fetch(1).split(/\s+/).
-      fetch(col).chomp(block_size).to_f
+      then { |row|
+        {avail: -3, used: -4}.transform_values do
+          val = row.fetch(_1).chomp(block_size).to_f
+          val = yield val if block_given?
+          val
+        end
+      }
+    col ? res.fetch(col) : res
   end
 
   class LocalRunner
@@ -45,7 +51,7 @@ module Utils
   end
 
   def self.df_bytes(path, **opts, &block)
-    (df(path, 'K', **opts, &block) * 1024).to_i
+    df(path, 'K', **opts) { (_1 * 1024).to_i }
   end
 
   def self.merge_uri(a, b=nil, params={})
