@@ -11,6 +11,10 @@ class SABnzbd
   def queue &block; get_slots({mode: "queue"}, "queue", &block) end
   def queue_resume_all; @http.get [mode: "resume"] end
 
+  def queue_pause(nzoid)
+    @http.get [mode: "queue", name: "pause", value: nzoid]
+  end
+
   def queue_resume(nzoid)
     @http.get [mode: "queue", name: "resume", value: nzoid]
   end
