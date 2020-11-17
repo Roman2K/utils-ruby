@@ -79,6 +79,9 @@ module Fmt
 
   SIZE_FMT = NumFmt.new(1024, %w[B KiB MiB GiB TiB]) { |n,u| "#{n} #{u}" }
   def self.size(n, prec=1); SIZE_FMT.format n, prec end
+
+  NUM_FMT = NumFmt.new(1000, ["", "k", "m"]) { |n,u| "#{n}#{u}" }
+  def self.num(n, prec=1); NUM_FMT.format n, prec end
 end
 
 end
