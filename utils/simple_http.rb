@@ -117,10 +117,11 @@ class SimpleHTTP
     when *expect
     else raise UnexpectedRespError.new(resp)
     end
-    if json_out
+    return resp if !json_out
+    begin
       JSON.parse resp.body
-    else
-      resp
+    rescue JSON::ParserError
+      raise "invalid JSON: %p" % [resp.body]
     end
   end
 
@@ -132,7 +133,7 @@ class SimpleHTTP
     attr_reader :resp
   end
 
-  private def request_body(cls, path, payload, expect:, **opts)
+  private def request_body(cls, path, payload, expect:, **opts, &block)
     req = new_req cls, path
     if @type_config.merge(opts).json_in && !payload.kind_of?(String)
       req['Content-Type'] = "application/json"
@@ -143,7 +144,7 @@ class SimpleHTTP
       end
     end
     req.body = payload
-    request req, expect: expect, **opts
+    request req, expect: expect, **opts, &block
   end
 end
 
