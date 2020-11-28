@@ -4,6 +4,22 @@ require_relative '../utils'
 module Utils
 
 class ConfTest < Minitest::Test
+  def test_delete
+    conf = Conf.new({
+      a: 1,
+      b: {},
+    })
+    assert_equal [:a, :b], conf.to_hash.keys
+
+    res = conf.delete "a"
+    assert_equal 1, res
+    assert_equal [:b], conf.to_hash.keys
+
+    res = conf.delete :b
+    assert_kind_of Utils::Conf, res
+    assert_equal [], conf.to_hash.keys
+  end
+
   def test_brackets
     conf = Conf.new({
       a: 1,

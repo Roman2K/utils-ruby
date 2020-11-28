@@ -36,6 +36,13 @@ class Conf
     key.to_s.split(".").inject(self) { |c,k| c.at k }
   end
 
+  def delete(key)
+    raise "dot keys not supported" if key =~ /\./
+    res = self[key]
+    [key.to_s, key.to_sym].each { |k| @h.delete k }
+    res
+  end
+
   def slice(*keys)
     keys.each_with_object({}) { |k,h| h[k] = self[k] }
   end
