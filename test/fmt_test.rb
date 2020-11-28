@@ -5,6 +5,13 @@ require 'bigdecimal'
 module Utils
 
 class FmtTest < Minitest::Test
+  def test_duration
+    fmt = Fmt.public_method :duration
+    assert_equal "123ms", fmt.(0.123)
+    assert_equal "1s", fmt.(1)
+    assert_equal "1s", fmt.(1.01)
+    assert_equal "1.2s", fmt.(1.2)
+  end
   def test_dec_prec
     assert_equal 1, dec("2").prec
     assert_equal 1, dec("2.0").prec
