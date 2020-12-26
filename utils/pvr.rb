@@ -6,11 +6,14 @@ module Utils
 module PVR
   class Basic
     DEFAULT_TIMEOUT = 60
+    DEFAULT_BATCH_SIZE = 200
 
-    def initialize(uri, timeout: DEFAULT_TIMEOUT, log: Log.new)
+    def initialize(uri,
+      batch_size: DEFAULT_BATCH_SIZE, timeout: DEFAULT_TIMEOUT, log: Log.new
+    )
       @http = SimpleHTTP.new uri, json: true, timeout: timeout, log: log
       @log = log
-      @timeout = timeout
+      @batch_size = batch_size
     end
 
     def to_s; name.to_s end
@@ -42,7 +45,7 @@ module PVR
       fetched = 0
       total = nil
       uri = uri.yield_self do |path, params={}|
-        Utils.merge_uri path, pageSize: 200, **params
+        Utils.merge_uri path, pageSize: @batch_size, **params
       end
       loop do
         Hash[URI.decode_www_form(uri.query || "")].

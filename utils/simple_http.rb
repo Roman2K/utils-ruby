@@ -18,7 +18,7 @@ class SimpleHTTP
   attr_reader :type_config
 
   private def start
-    cli = @get_client[]
+    cli = @get_client.()
     if cli.started?
       yield cli
     else
@@ -49,7 +49,11 @@ class SimpleHTTP
     uri = URI uri
     get_client = -> do
       Net::HTTP.new(uri.host, uri.port).tap do |http|
-        http.use_ssl = (uri.scheme == 'https')
+        case uri.scheme
+        when 'https' then http.use_ssl = true
+        when 'http'
+        else raise "unhandled URI scheme"
+        end
         %i[open ssl read write continue].each do |op|
           meth = :"#{op}_timeout="
           http.public_send meth, @timeout if http.respond_to? meth
