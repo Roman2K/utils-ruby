@@ -1,9 +1,16 @@
+PATH
+  remote: .
+  specs:
+    utils-ruby (0.1.0)
+      net_http_unix (~> 0.2)
+
 GEM
   remote: https://rubygems.org/
   specs:
     coderay (1.1.2)
     method_source (1.0.0)
     minitest (5.11.3)
+    net_http_unix (0.2.2)
     pry (0.13.0)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -14,6 +21,7 @@ PLATFORMS
 DEPENDENCIES
   minitest
   pry
+  utils-ruby!
 
 BUNDLED WITH
    2.1.4
