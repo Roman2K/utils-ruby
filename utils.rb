@@ -20,6 +20,7 @@ module Utils
   util_autoload :DU, 'du'
   util_autoload :Events, 'events'
   util_autoload :DockerClient, 'docker_client'
+  util_autoload :YAMLTmpl, 'yaml_tmpl'
 
   def self.df(path, block_size, col: :avail, runner: LocalRunner.new)
     path = path.to_s if Pathname === path
