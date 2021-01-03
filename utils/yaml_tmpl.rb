@@ -1,11 +1,10 @@
 require 'yaml'
-require 'pathname'
 
 module Utils
 
 class YAMLTmpl
   def initialize(filters=MAIN_FILTERS)
-    @filters = filters
+    @filters = Filters[filters]
   end
 
   class Filters < Hash
@@ -73,17 +72,10 @@ class YAMLTmpl
 
     def apply(name, default: nil)
       @vars.fetch name do
-        get_default = -> do
-          if block_given?
-            yield
-          else
-            default or raise "missing var: #{name.inspect}"
-          end
-        end
         if @defaults
-          @defaults.apply name, &get_default
+          @defaults.apply name, default: default
         else
-          get_default.()
+          default or raise "missing var: #{name.inspect}"
         end
       end
     end
@@ -120,12 +112,12 @@ class YAMLTmpl
     def self.apply(h); h end
   end
 
-  MAIN_FILTERS = Filters[
+  MAIN_FILTERS = {
     _incl: Incl,
     _eval: Eval,
     _merge: Merge,
     _noop: Noop,
-  ]
+  }
 end
 
 end
