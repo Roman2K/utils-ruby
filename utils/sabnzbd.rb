@@ -8,7 +8,8 @@ class SABnzbd
   end
 
   def history &block; get_slots({mode: "history"}, "history", &block) end
-  def queue_raw; @http.get([{mode: "queue"}]).fetch("queue") end
+  def restart; @http.get [mode: "restart"] end
+  def queue_raw; @http.get([mode: "queue"]).fetch("queue") end
   def queue &block; get_slots({mode: "queue"}, "queue", &block) end
   def queue_resume_all; @http.get [mode: "resume"] end
 
