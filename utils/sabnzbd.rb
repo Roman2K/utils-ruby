@@ -21,6 +21,12 @@ class SABnzbd
     @http.get [mode: "queue", name: "resume", value: nzoid]
   end
 
+  def queue_del(nzoid, del_files: false)
+    @http.get [{mode: "queue", name: "delete", value: nzoid}.tap { |h|
+      h[:del_files] = "1" if del_files
+    }]
+  end
+
   LIMIT = 500
 
   private def get_slots(params, key, &block)
