@@ -82,6 +82,11 @@ module PVR
     ENDPOINT_ENTITY = "/episode".freeze
     def history_entity_id(ev); ev.fetch "episodeId" end
   end
+
+  class Lidarr < Basic
+    NAME = "Lidarr".freeze
+    def queue; fetch_all(["/queue", page: 1]).to_a end
+  end
 end # PVR
 
 end # Utils
