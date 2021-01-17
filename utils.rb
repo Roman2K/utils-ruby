@@ -10,6 +10,7 @@ module Utils
 
   util_autoload :Log, 'log'
   util_autoload :QBitTorrent, 'qbittorrent'
+  util_autoload :Transmission, 'transmission'
   util_autoload :SABnzbd, 'sabnzbd'
   util_autoload :PVR, 'pvr'
   util_autoload :Fmt, 'fmt'

@@ -3,7 +3,7 @@ require 'json'
 
 module Utils
 
-# https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation
+# https://github.com/qbittorrent/qBittorrent/wiki#webui-api
 class QBitTorrent
   def initialize(uri, log: Log.new)
     @log = log
