@@ -17,27 +17,25 @@ class QBitTorrent
     post! "/api/v2/transfer/setDownloadLimit", 'limit' => n
   end
 
-  def pause_downloading
-    pause downloading.select { |t| t.fetch("state") != "pausedDL" }
-  end
-
-  def resume_downloading
-    resume downloading.select { |t| t.fetch("state") == "pausedDL" }
-  end
-
-  %i[all downloading completed paused active inactive].each do |filter|
-    define_method filter do |*args, **opts, &block|
-      torrents *args, filter: filter, **opts, &block
-    end
-  end
-
   def torrents(filter: nil)
     q = {filter: filter}
     uri = add_uri "/api/v2/torrents/info", q.reject { |k,v| v.nil? }
+    get_json!(uri).
+      tap { |ts| @log[q: q].debug "fetched %d torrents" % ts.size }.
+      map { Torrent.new _1 }
+  end
 
-    get_json!(uri).tap do |ts|
-      @log[q: q].debug "fetched %d torrents" % ts.size
-    end
+  class Torrent
+    def initialize(data); @data = data end
+    def name; @data.fetch "name" end
+    def cat; @data.fetch "category" end
+    def hash_string; @data.fetch "hash" end
+    def size; @data.fetch "size" end
+    def state; @data.fetch "state" end
+    def added_on; Time.at @data.fetch "added_on" end
+    def completion_on; Time.at @data.fetch "completion_on" end
+    def progress; @data.fetch "progress" end
+    def ratio; @data.fetch "ratio" end
   end
 
   def recheck(ts)
@@ -94,7 +92,7 @@ class QBitTorrent
       return
     end
     yield log if block_given?
-    post! path, data.merge('hashes' => ts.map { |t| t.fetch "hash" } * "|")
+    post! path, data.merge('hashes' => ts.map(&:hash_string) * "|")
   end
 
   private def set_cookie!(user, password)

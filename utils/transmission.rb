@@ -59,32 +59,20 @@ class Transmission
     }.freeze
 
     API_FIELDS = %w[
-      hashString name downloadDir totalSize status addedDate doneDate percentDone
+      hashString name downloadDir sizeWhenDone status addedDate doneDate percentDone
       uploadRatio desiredAvailable
     ]
 
     def initialize(data); @data = data end
-    attr_accessor :log, :status, :pvr
-
     def name; @data.fetch "name" end
     def cat; File.basename @data.fetch("downloadDir") end
     def hash_string; @data.fetch "hashString" end
-    def size; @data.fetch "totalSize" end
+    def size; @data.fetch "sizeWhenDone" end
     def state; STATUSES.fetch @data.fetch "status" end
     def added_on; Time.at @data.fetch "addedDate" end
     def completion_on; Time.at @data.fetch "doneDate" end
     def progress; @data.fetch "percentDone" end
     def ratio; @data.fetch "uploadRatio" end
-
-    def attrs
-      {}.tap do |h|
-        %i[ name cat hash_string size state added_on completion_on progress
-            ratio ].each \
-        do |k|
-          h[k] = public_send k
-        end
-      end
-    end
   end
 end
 
