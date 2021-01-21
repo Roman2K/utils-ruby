@@ -110,7 +110,7 @@ class ConfTest < Minitest::Test
 
     h = Conf.new({a: {b: 1}}).to_hash
     assert_equal [:a], h.keys
-    assert_kind_of Conf, h.fetch(:a)
+    assert_kind_of Hash, h.fetch(:a)
     assert_equal 1, h.fetch(:a)[:b]
   end
 end

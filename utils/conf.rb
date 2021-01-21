@@ -52,7 +52,7 @@ class Conf
   end
 
   def to_hash
-    keys.inject({}) { |h,k| h[k] = self[k]; h }
+    @h.dup
   end
 
   def lookup(key)
