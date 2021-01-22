@@ -36,6 +36,13 @@ class QBitTorrent
     def completion_on; Time.at @data.fetch "completion_on" end
     def progress; @data.fetch "progress" end
     def ratio; @data.fetch "ratio" end
+    def downloading?
+      case state
+      when 'pausedDL' then false
+      when 'downloading', /DL$/ then true
+      else false
+      end
+    end
   end
 
   def recheck(ts)
@@ -54,13 +61,13 @@ class QBitTorrent
     @log[torrent: t.fetch("name")]
   end
 
-  private def pause(ts)
+  def pause(ts)
     post_hashes! "/api/v2/torrents/pause", ts do |log|
       log.debug "pausing"
     end
   end
 
-  private def resume(ts)
+  def resume(ts)
     post_hashes! "/api/v2/torrents/resume", ts do |log|
       log.debug "resuming"
     end
