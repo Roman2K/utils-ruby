@@ -26,12 +26,15 @@ module PVR
     def queue; @http.get "/queue" end
 
     def downloaded_scan(path, download_client_id: nil, import_mode: nil)
-      @http.post "/command", {}.tap { |body|
-        body["name"] = self.class::CMD_DOWNLOADED_SCAN
+      post_command self.class::CMD_DOWNLOADED_SCAN, {}.tap { |body|
         body["path"] = path
         body["downloadClientId"] = download_client_id if download_client_id
         body["importMode"] = import_mode if import_mode
       }
+    end
+
+    private def post_command(name, body)
+      @http.post "/command", body.merge("name" => name)
     end
 
     def queue_del(id, blacklist: nil)
@@ -73,14 +76,20 @@ module PVR
     NAME = "Radarr".freeze
     CMD_DOWNLOADED_SCAN = "DownloadedMoviesScan".freeze
     ENDPOINT_ENTITY = "/movie".freeze
-    def history_entity_id(ev); ev.fetch "movieId" end
+    def history_entity_id(ev); ev.fetch 'movieId' end
+    def history_scannable_id(ev); ev.fetch 'movieId' end
+    def history_dest_path(ev); ev.fetch('movie').fetch 'path' end
+    def rescan(id); post_command 'RefreshMovie', 'movieIds' => [id] end
   end
 
   class Sonarr < Basic
     NAME = "Sonarr".freeze
     CMD_DOWNLOADED_SCAN = "DownloadedEpisodesScan".freeze
     ENDPOINT_ENTITY = "/episode".freeze
-    def history_entity_id(ev); ev.fetch "episodeId" end
+    def history_entity_id(ev); ev.fetch 'episodeId' end
+    def history_scannable_id(ev); ev.fetch 'seriesId' end
+    def history_dest_path(ev); raise NotImplementedError end
+    def rescan(id); post_command 'RescanSeries', 'seriesId' => id end
   end
 
   class Lidarr < Basic
