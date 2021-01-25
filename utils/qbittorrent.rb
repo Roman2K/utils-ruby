@@ -32,6 +32,7 @@ class QBitTorrent
     def hash_string; @data.fetch "hash" end
     def size; @data.fetch "size" end
     def state; @data.fetch "state" end
+    def time_active; @data.fetch "time_active" end
     def added_on; Time.at @data.fetch "added_on" end
     def completion_on; Time.at @data.fetch "completion_on" end
     def progress; @data.fetch "progress" end
