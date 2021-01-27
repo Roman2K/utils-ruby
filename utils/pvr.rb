@@ -76,9 +76,12 @@ module PVR
     NAME = "Radarr".freeze
     CMD_DOWNLOADED_SCAN = "DownloadedMoviesScan".freeze
     ENDPOINT_ENTITY = "/movie".freeze
+    def history_entity(ev); ev.fetch 'movie' end
     def history_entity_id(ev); ev.fetch 'movieId' end
-    def history_scannable_id(ev); ev.fetch 'movieId' end
+    def history_scannable_id(ev); history_entity_id ev end
     def history_dest_path(ev); ev.fetch('movie').fetch 'path' end
+    def history_group_keys(ev); [history_group_key(ev)] end
+    def history_group_key(ev); [:movie, history_entity_id(ev)] end
     def rescan(id); post_command 'RefreshMovie', 'movieIds' => [id] end
   end
 
@@ -86,15 +89,46 @@ module PVR
     NAME = "Sonarr".freeze
     CMD_DOWNLOADED_SCAN = "DownloadedEpisodesScan".freeze
     ENDPOINT_ENTITY = "/episode".freeze
-    def history_entity_id(ev); ev.fetch 'episodeId' end
-    def history_scannable_id(ev); ev.fetch 'seriesId' end
+    KEY_EP_ID = 'episodeId'.freeze
+    KEY_SERIES_ID = 'seriesId'.freeze
+    def history_entity(ev); ev.fetch 'episode' end
+    def history_entity_id(ev); ev.fetch KEY_EP_ID end
+    def history_scannable_id(ev); ev.fetch KEY_SERIES_ID end
     def history_dest_path(ev); raise NotImplementedError end
+    def history_group_keys(ev)
+      [ history_group_key(ev),
+        history_group_key(ev.dup.tap { _1.delete KEY_EP_ID }) ].uniq
+    end
+    def history_group_key(ev)
+      if id = ev[KEY_EP_ID]
+      then [:episode, id]
+      else [:series, ev.fetch(KEY_SERIES_ID)]
+      end
+    end
     def rescan(id); post_command 'RescanSeries', 'seriesId' => id end
   end
 
   class Lidarr < Basic
     NAME = "Lidarr".freeze
     def queue; fetch_all(["/queue", page: 1]).to_a end
+  end
+
+  module Event
+    def self.of_pvr(pvr, ev)
+      ev = ev.dup.extend(self)
+      ev.instance_variable_set :@pvr, pvr
+      ev
+    end
+      
+    methods = PVR.constants.flat_map { |const|
+      cls = PVR.const_get const
+      next [] unless Class === cls && cls < Basic
+      cls.public_instance_methods.grep(/^history_/) { $' }
+    }.uniq.each { |method|
+      define_method method do |*args, &block|
+        @pvr.public_send :"history_#{method}", self, *args, &block
+      end
+    }
   end
 end # PVR
 
