@@ -37,6 +37,7 @@ class QBitTorrent
     def completion_on; Time.at @data.fetch "completion_on" end
     def progress; @data.fetch "progress" end
     def ratio; @data.fetch "ratio" end
+    def path; @data.fetch "content_path" end
     def downloading?
       case state
       when 'pausedDL' then false
