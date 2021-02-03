@@ -29,9 +29,14 @@ module PVR
       post_command self.class::CMD_DOWNLOADED_SCAN, {}.tap { |body|
         body["path"] = path
         body["downloadClientId"] = download_client_id if download_client_id
-        body["importMode"] = import_mode if import_mode
+        body["importMode"] = CMD_IMPORT_MODES.fetch import_mode if import_mode
       }
     end
+
+    CMD_IMPORT_MODES = {
+      move: 'Move',
+      copy: 'Copy',
+    }
 
     private def post_command(name, body)
       @http.post "/command", body.merge("name" => name)
