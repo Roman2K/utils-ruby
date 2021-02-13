@@ -147,6 +147,11 @@ class Log
   def self.matcher(level, pat)
     Regexp.new(" *#{Regexp.escape level} +#{pat}", Regexp::IGNORECASE)
   end
+
+  class Noop < self
+    def puts(*msgs, level: nil, eol: nil)
+    end
+  end
 end
 
 end # Utils
