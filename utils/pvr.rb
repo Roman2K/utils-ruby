@@ -24,6 +24,7 @@ module PVR
     def command(id); @http.get "/command/#{id}" end
     def entity(id); @http.get "#{self.class::ENDPOINT_ENTITY}/#{id}" end
     def queue; @http.get "/queue" end
+    def check_health; post_command 'CheckHealth', {} end
 
     def downloaded_scan(path, download_client_id: nil, import_mode: nil)
       post_command self.class::CMD_DOWNLOADED_SCAN, {}.tap { |body|
