@@ -38,6 +38,7 @@ class QBitTorrent
     def progress; @data.fetch "progress" end
     def ratio; @data.fetch "ratio" end
     def path; @data.fetch "content_path" end
+    def availability; @data.fetch "availability" end
     def downloading?
       case state
       when 'pausedDL' then false
