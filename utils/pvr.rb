@@ -49,6 +49,10 @@ module PVR
       @http.delete ["/queue/#{id}", params], nil
     end
 
+    protected def group_key(ev, type, entity_id)
+      [type, entity_id, ev.fetch("quality").fetch("quality").fetch("id")]
+    end
+
     protected def fetch_all(uri)
       return enum_for __method__, uri unless block_given?
       fetched = 0
@@ -87,7 +91,7 @@ module PVR
     def history_scannable_id(ev); history_entity_id ev end
     def history_dest_path(ev); ev.fetch('movie').fetch 'path' end
     def history_group_keys(ev); [history_group_key(ev)] end
-    def history_group_key(ev); [:movie, history_entity_id(ev)] end
+    def history_group_key(ev); group_key ev, :movie, history_entity_id(ev) end
     def rescan(id); post_command 'RefreshMovie', 'movieIds' => [id] end
   end
 
@@ -106,10 +110,10 @@ module PVR
         history_group_key(ev.dup.tap { _1.delete KEY_EP_ID }) ].uniq
     end
     def history_group_key(ev)
-      if id = ev[KEY_EP_ID]
-      then [:episode, id]
-      else [:series, ev.fetch(KEY_SERIES_ID)]
-      end
+      group_key ev, *if id = ev[KEY_EP_ID]
+        then [:episode, id]
+        else [:series, ev.fetch(KEY_SERIES_ID)]
+        end
     end
     def rescan(id); post_command 'RescanSeries', 'seriesId' => id end
   end
