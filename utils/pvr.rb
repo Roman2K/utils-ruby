@@ -121,6 +121,9 @@ module PVR
   class Lidarr < Basic
     NAME = "Lidarr".freeze
     def queue; fetch_all(["/queue", page: 1]).to_a end
+    def history_entity_id(ev); ev.fetch 'albumId' end
+    def history_group_keys(ev); [history_group_key(ev)] end
+    def history_group_key(ev); group_key ev, :album, history_entity_id(ev) end
   end
 
   module Event
