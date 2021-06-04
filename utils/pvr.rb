@@ -23,7 +23,7 @@ module PVR
     def commands; @http.get "/command" end
     def command(id); @http.get "/command/#{id}" end
     def entity(id); @http.get "#{self.class::ENDPOINT_ENTITY}/#{id}" end
-    def queue; @http.get "/queue" end
+    def queue; fetch_all(["/queue", page: 1]).to_a end
     def check_health; post_command 'CheckHealth', {} end
 
     def downloaded_scan(path, download_client_id: nil, import_mode: nil)
@@ -101,6 +101,7 @@ module PVR
     ENDPOINT_ENTITY = "/episode".freeze
     KEY_EP_ID = 'episodeId'.freeze
     KEY_SERIES_ID = 'seriesId'.freeze
+    def queue; @http.get "/queue" end
     def history_entity(ev); ev.fetch 'episode' end
     def history_entity_id(ev); ev.fetch KEY_EP_ID end
     def history_scannable_id(ev); ev.fetch KEY_SERIES_ID end
@@ -120,7 +121,6 @@ module PVR
 
   class Lidarr < Basic
     NAME = "Lidarr".freeze
-    def queue; fetch_all(["/queue", page: 1]).to_a end
     def history_entity_id(ev); ev.fetch 'albumId' end
     def history_group_keys(ev); [history_group_key(ev)] end
     def history_group_key(ev); group_key ev, :album, history_entity_id(ev) end
