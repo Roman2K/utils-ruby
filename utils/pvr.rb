@@ -86,10 +86,9 @@ module PVR
     NAME = "Radarr".freeze
     CMD_DOWNLOADED_SCAN = "DownloadedMoviesScan".freeze
     ENDPOINT_ENTITY = "/movie".freeze
-    def history_entity(ev); ev.fetch 'movie' end
     def history_entity_id(ev); ev.fetch 'movieId' end
     def history_scannable_id(ev); history_entity_id ev end
-    def history_dest_path(ev); ev.fetch('movie').fetch 'path' end
+    def history_dest_path(ev); entity(history_entity_id(ev)).fetch 'path' end
     def history_group_keys(ev); [history_group_key(ev)] end
     def history_group_key(ev); group_key ev, :movie, history_entity_id(ev) end
     def rescan(id); post_command 'RefreshMovie', 'movieIds' => [id] end
@@ -102,7 +101,6 @@ module PVR
     KEY_EP_ID = 'episodeId'.freeze
     KEY_SERIES_ID = 'seriesId'.freeze
     def queue; @http.get "/queue" end
-    def history_entity(ev); ev.fetch 'episode' end
     def history_entity_id(ev); ev.fetch KEY_EP_ID end
     def history_scannable_id(ev); ev.fetch KEY_SERIES_ID end
     def history_dest_path(ev); raise NotImplementedError end
